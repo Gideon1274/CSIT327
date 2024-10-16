@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This document outlines the Gantt chart, functional requirements, ERD, and UI/UX design for the CSIT327 project.
+
 
 ### Project Resources
 
@@ -11,5 +11,6 @@ This document outlines the Gantt chart, functional requirements, ERD, and UI/UX 
 [Functional Requirements](https://docs.google.com/document/d/1BPyiIekjZSr-3ZxI3O1co8hnMoSiAlF9UPLC84fAHmI/edit?usp=sharing)
 
  **Prototype**: [Figma Prototype](https://www.figma.com/proto/JTNKVPvM3Tbhcq9Ys31q5A/CSIT327---UI%2FUX?node-id=0-1&t=XJqH76OZ3BGsQwSq-1)
+ 
  **Developer Mode**: [Figma Design (Developer Mode)](https://www.figma.com/design/JTNKVPvM3Tbhcq9Ys31q5A/CSIT327---UI%2FUX?node-id=0-1&m=dev&t=XJqH76OZ3BGsQwSq-1)
 

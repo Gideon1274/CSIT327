@@ -6,7 +6,7 @@
 
 ### Project Resources
 
-[Gantt Chart](https://docs.google.com/spreadsheets/d/1WhvV2nu9Dmaa6ur___P-8IkeCW_JRyXy/edit?usp=drive_link&ouid=111954012838656286849&rtpof=true&sd=true)
+[Gantt Chart](https://docs.google.com/spreadsheets/d/1C3PfKx-7sK16_5QgK9Sc5nPQuVvwR1wF/edit?usp=sharing&ouid=111954012838656286849&rtpof=true&sd=true)
 
 [Functional Requirements](https://docs.google.com/document/d/1BPyiIekjZSr-3ZxI3O1co8hnMoSiAlF9UPLC84fAHmI/edit?usp=sharing)
 

@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, HttpResponseRedirect
 from .models import *
 from django.http import JsonResponse
 import json
@@ -6,13 +6,27 @@ import datetime
 from .utils import cookieCart, cartData, guestOrder
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.csrf import csrf_protect
+from .forms import SignUpForm
+from django.contrib.auth.decorators import login_required
 
-def register_view(request):
-    return render(request, 'userauths/sign.html')
 
 
+
+def signup_view(request):
+    if request.method == 'POST':
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            messages.success(request, f'Account created for {username}!')
+            return redirect('store:login_view') 
+        else:
+            messages.error(request, "Error creating account. Please try again.")
+    else:
+        form = SignUpForm()
+    return render(request, 'store/signup.html', {'form': form})
 def login_view(request):
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
@@ -33,15 +47,17 @@ def login_view(request):
 
     return render(request, 'store/login.html', {'form': form})
 
+
 def store(request):
     data = cartData(request)
     cartItems = data['cartItems']
 
-    products = Product.objects.all()
-    context = {'products': products, 'cartItems': cartItems}
-    return render(request, 'store/store.html', context)
+    products = Product.objects.all()  # Fetch all products
+    context = {'products': products, 'cartItems': cartItems}  # Pass products to the context
+    return render(request, 'store/store.html', context)  # Render store.html with the context
 
 
+@login_required
 def cart(request):
     data = cartData(request)
     cartItems = data['cartItems']
@@ -52,6 +68,7 @@ def cart(request):
     return render(request, 'store/cart.html', context)
 
 
+@login_required
 def checkout(request):
     data = cartData(request)
     cartItems = data['cartItems']
@@ -62,6 +79,7 @@ def checkout(request):
     return render(request, 'store/checkout.html', context)
 
 
+@login_required
 def updateItem(request):
     data = json.loads(request.body)
     productId = data['productId']
@@ -93,6 +111,8 @@ def updateItem(request):
 
 # from django.view.decorators.csrf import csrf_exempt
 # @csrf_exempt
+
+@login_required
 def processOrder(request):
     # print('Data:', request.body)
     transaction_id = datetime.datetime.now().timestamp()
@@ -122,3 +142,71 @@ def processOrder(request):
             zipcode=data['shipping']['zipcode'],
         )
     return JsonResponse('Payment complete!', safe=False)
+
+
+def user_logout(request):
+    logout(request)
+    return HttpResponseRedirect('/login/')
+
+from django.shortcuts import render
+from .models import Product, Category  # Adjust based on your models
+
+@login_required
+def search_view(request):
+    categories = Category.objects.all()  # Fetch all categories
+    selected_category = request.GET.get('category', None)
+    query = request.GET.get('query', '')
+
+    products = Product.objects.all()
+    if selected_category:
+        products = products.filter(category_id=selected_category)  # Filter by selected category
+    if query:
+        products = products.filter(name__icontains=query)  # Filter by query
+
+    context = {
+        'categories': categories,
+        'selected_category': selected_category,
+        'products': products,
+        'cartItems': cartData(request)['cartItems'],  # Ensure cartItems are included
+    }
+    return render(request, 'store/store.html', context)  # Render store.html with the context
+
+
+from django.shortcuts import render
+from .models import Product  # Assuming Product is your model
+
+# def store_view(request):
+#     query = request.GET.get('query', '')
+#     category_id = request.GET.get('category', '')
+
+#     products = Product.objects.all()  # Get all products by default
+
+#     if category_id:
+#         products = products.filter(category_id=category_id)  # Filter by selected category
+
+#     if query:
+#         products = products.filter(name__icontains=query)  # Filter by search term
+
+#     categories = Category.objects.all()  # Assuming you have a Category model
+#     context = {
+#         'products': products,
+#         'categories': categories,
+#     }
+
+#     return render(request, 'store/store.html', context)
+
+
+@login_required
+def store(request):
+    query = request.GET.get('query', '')
+    category_id = request.GET.get('category', '')
+
+    products = Product.objects.all()
+
+    if category_id:
+        products = products.filter(category__id=category_id)
+
+    if query:
+        products = products.filter(name__icontains=query)
+
+    return render(request, 'store/store.html', {'products': products})

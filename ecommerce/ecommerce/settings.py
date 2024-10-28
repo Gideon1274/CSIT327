@@ -148,6 +148,7 @@ JAZZMIN_SETTINGS = {
     'site_coppyright': "IYOT",
 }
 
+LOGIN_URL = '/login/'
 
 
 # AUTH_USER_MODEL = 'userauths.User'

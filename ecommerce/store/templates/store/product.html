@@ -1,0 +1,13 @@
+
+{% extends 'store/main.html' %}
+{% block content %}
+
+<div class="container">
+    <h2>{{ product.name }}</h2>
+    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid">
+    <p><strong>Price:</strong> ${{ product.price }}</p>
+    <p><strong>Category:</strong> {{ product.category.name }}</p>
+    <p><strong>Description:</strong> {{ product.description }}</p>
+</div>
+
+{% endblock content %}

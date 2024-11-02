@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, HttpResponseRedirect
+from django.shortcuts import render, redirect, HttpResponseRedirect,  get_object_or_404
 from .models import *
 from django.http import JsonResponse
 import json
@@ -10,7 +10,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.csrf import csrf_protect
 from .forms import SignUpForm
 from django.contrib.auth.decorators import login_required
-
+from .models import Product
+from .forms import ProductForm
 
 
 
@@ -48,13 +49,8 @@ def login_view(request):
     return render(request, 'store/login.html', {'form': form})
 
 
-def store(request):
-    data = cartData(request)
-    cartItems = data['cartItems']
 
-    products = Product.objects.all()  # Fetch all products
-    context = {'products': products, 'cartItems': cartItems}  # Pass products to the context
-    return render(request, 'store/store.html', context)  # Render store.html with the context
+
 
 
 @login_required
@@ -82,6 +78,8 @@ def checkout(request):
 @login_required
 def updateItem(request):
     data = json.loads(request.body)
+    # data = json.loads(request.post.get('data'))
+    # data = json.loads(request.body.decode('utf-8'))
     productId = data['productId']
     action = data['action']
 
@@ -143,7 +141,39 @@ def processOrder(request):
         )
     return JsonResponse('Payment complete!', safe=False)
 
+@login_required
+def product(request, pk): 
+    product = get_object_or_404(Product, pk=pk)
+    context = {
+        'product': product,
+    }
+    return render(request, 'store/product.html', context)
+@login_required
+def profile(request):
+    user = request.user
+    products = user.products.all()  
+    
+    if request.method == 'POST':
+        form = ProductForm(request.POST, request.FILES)
+        if form.is_valid():
+            product = form.save(commit=False)
+            product.user = user  # Associate the product with the logged-in user
+            product.save()
+            return redirect('/profile')  # Redirect to profile page after adding the product
+    else:
+        form = ProductForm()
 
+    # context = {
+    #     'user': user,
+    #     'products': products,
+    #     'form': form,
+    # }
+    context = {
+        'user': request.user,
+        'products': request.user.products.all(),  
+        'form': form,        
+        }
+    return render(request, 'store/profile.html', context)
 def user_logout(request):
     logout(request)
     return HttpResponseRedirect('/login/')
@@ -196,17 +226,79 @@ from .models import Product  # Assuming Product is your model
 #     return render(request, 'store/store.html', context)
 
 
+# @login_required
+# def store(request):
+#     query = request.GET.get('query', '')
+#     category_id = request.GET.get('category', '')
+
+#     products = Product.objects.all()
+
+#     if category_id:
+#         products = products.filter(category__id=category_id)
+
+#     if query:
+#         products = products.filter(name__icontains=query)
+
+#     return render(request, 'store/store.html', {'products': products})
+
+# @login_required
+# def store(request):
+#     data = cartData(request)
+#     cartItems = data['cartItems']
+
+#     products = Product.objects.all()
+#     context = {'products': products, 'cartItems': cartItems, 'categories': categories} 
+#     return render(request, 'store/store.html', context)  # Render store.html with the context
+
+def get_cart_items_count(request):
+    cart = request.session.get('cart', {})  
+    return sum(cart.values()) 
+
 @login_required
 def store(request):
     query = request.GET.get('query', '')
-    category_id = request.GET.get('category', '')
+    category_id = request.GET.get('category', '')  
 
     products = Product.objects.all()
+    categories = Category.objects.all()
 
     if category_id:
-        products = products.filter(category__id=category_id)
-
+        products = products.filter(category_id=category_id)
+    
     if query:
         products = products.filter(name__icontains=query)
 
-    return render(request, 'store/store.html', {'products': products})
+    cartItems = get_cart_items_count(request)
+    
+    context = {
+        'products': products,
+        'categories': categories,
+        'cartItems': cartData(request)['cartItems'],
+    }
+    return render(request, 'store/store.html', context)
+
+
+
+def create_product(request):
+    if request.method == 'POST':
+        form = ProductForm(request.POST, request.FILES)
+        if form.is_valid():
+            product = form.save(commit=False)
+            product.user = request.user 
+            product.save()
+            return redirect('/profile')  # Replace with the URL you want to redirect to upon success
+    else:
+        form = ProductForm()
+    return render(request, 'create_product.html', {'form': form})
+
+
+def remove_product(request, product_id):
+    context = {
+        
+    }
+    if request.method == 'POST':
+        product = get_object_or_404(Product, id=product_id)
+        product.delete() 
+        return redirect('/profile') 
+        
+        # return render(request, 'store/profile.html', context)

@@ -86,7 +86,7 @@
     }
 
     .row-image {
-        width: 50px; /* Image size */
+        width: 200px; 
         height: auto;
         border-radius: 5px;
     }
@@ -138,7 +138,7 @@
             </div>
             {% for item in items %}
             <div class="cart-row">
-                <div style="flex:2"><img class="row-image" src="{{ item.product.imageURL }}"></div>
+                <div style="flex:2"><img class="row-image" src="{{ item.product.image.url }}"></div>
                 <div style="flex:2">
                     <p>{{ item.product.name }}</p>
                 </div>

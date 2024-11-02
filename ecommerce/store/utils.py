@@ -53,17 +53,18 @@ def cartData(request):
             customer=customer, complete=False)
         items = order.orderitem_set.all()
         cartItems = order.get_cart_items
-    else:
-        # Create empty cart for now for non-logged in user
-        cookieData = cookieCart(request)
-        cartItems = cookieData['cartItems']
-        order = cookieData['order']
-        items = cookieData['items']
-
+    # else:
+    #     cookieData = cookieCart(request)
+    #     cartItems = cookieData['cartItems']
+    #     order = cookieData['order']
+    #     items = cookieData['items']
+    print(customer)
+     
     return {'cartItems': cartItems, 'order': order, 'items': items}
 
 
 def guestOrder(request, data):
+    
     print('User is not logged in..')
 
     print('COOKIES:', request.COOKIES)

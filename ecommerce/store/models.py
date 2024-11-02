@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
-
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 class Customer(models.Model):
 	user = models.OneToOneField(User, null=True, blank=True, on_delete=models.CASCADE)
@@ -11,33 +12,33 @@ class Customer(models.Model):
 		return self.name
 
 class Category(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, default="Default")
 
     def __str__(self):
         return self.name
 
+@receiver(post_save, sender=User)
+def create_or_update_customer(sender, instance, created, **kwargs):
+    if created:
+        
+        Customer.objects.create(user=instance, name=instance.username, email=instance.email)
+    else:
+        
+        customer, _ = Customer.objects.get_or_create(user=instance)
+        customer.name = instance.username
+        customer.email = instance.email
+        customer.save()
+
 class Product(models.Model):
 	name = models.CharField(max_length=200)
-	# price = models.FloatField()
-	price = models.DecimalField(max_digits=7, decimal_places=2)
-	digital = models.BooleanField(default=False, null=True, blank=True)
-	image = models.ImageField(upload_to='product/images', null=True, blank=True)
-	category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
+	price = models.DecimalField(max_digits=10, decimal_places=2)
+	image = models.ImageField(upload_to='products/')
+	category = models.ForeignKey(Category, on_delete=models.CASCADE)
+	user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='products')
+	description = models.CharField(max_length=200, null=True, default="") 
 
 	def __str__(self):
 		return self.name
-
-	@property
-	def imageURL(self):
-		'''
-		We are using this property to avoid the error that occurs when the image is not found.
-		'''
-		try:
-			url = self.image.url
-		except:
-			url = ''
-		return url
-
 
 class Order(models.Model):
 	customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
@@ -70,19 +71,21 @@ class Order(models.Model):
 		return total 
 
 class OrderItem(models.Model):
-	product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
+	product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, default=None)
 	order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True)
 	quantity = models.IntegerField(default=0, null=True, blank=True)
 	date_added = models.DateTimeField(auto_now_add=True)
 
 	@property
 	def get_total(self):
-		total = self.product.price * self.quantity
-		return total
-
+		if self.product is not None:
+			total = self.product.price * self.quantity
+			return total
+		else:
+			return 0
 	def __str__(self):
 		return self.product.name
-
+	
 class ShippingAddress(models.Model):
 	customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True)
 	order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True)

@@ -2,6 +2,9 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db.models import Avg
+
 
 class Customer(models.Model):
 	user = models.OneToOneField(User, null=True, blank=True, on_delete=models.CASCADE)
@@ -9,6 +12,7 @@ class Customer(models.Model):
 	email = models.CharField(max_length=200)
 
 	def __str__(self):
+		
 		return self.name
 
 class Category(models.Model):
@@ -39,6 +43,18 @@ class Product(models.Model):
 
 	def __str__(self):
 		return self.name
+	def average_rating(self):
+		reviews = ProductReview.objects.filter(product=self)
+		if reviews.exists():
+			avg = round(reviews.aggregate(Avg('rating'))['rating__avg'], 1)
+			return avg
+		return 0
+	
+	def display_average_stars(self):
+		avg = int(self.average_rating())
+		filled_stars = '★' * avg
+		empty_stars = '☆' * (5 - avg)
+		return filled_stars + empty_stars
 
 class Order(models.Model):
 	customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
@@ -97,3 +113,23 @@ class ShippingAddress(models.Model):
 
 	def __str__(self):
 		return self.address
+	
+
+class ProductReview(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    review = models.CharField(max_length=200, null=True)
+    rating = models.PositiveIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        null=True,
+        blank=True
+    )
+    date_added = models.DateTimeField(auto_now_add=True)
+
+    def display_stars(self):
+        filled_stars = '★' * self.rating  # Filled stars
+        empty_stars = '☆' * (5 - self.rating)  # Empty stars
+        return filled_stars + empty_stars
+
+    def __str__(self):
+        return self.review

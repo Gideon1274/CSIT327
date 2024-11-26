@@ -10,12 +10,14 @@ from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.csrf import csrf_protect
 from .forms import SignUpForm
 from django.contrib.auth.decorators import login_required
-from .models import Product
 from .forms import ProductForm
-
-
+from .models import Product, ProductReview
+from .forms import ProductReviewForm
+from django.http import HttpResponseForbidden
 
 def signup_view(request):
+    if request.user.is_authenticated:
+        return redirect('store:store') 
     if request.method == 'POST':
         form = SignUpForm(request.POST)
         if form.is_valid():
@@ -27,8 +29,11 @@ def signup_view(request):
             messages.error(request, "Error creating account. Please try again.")
     else:
         form = SignUpForm()
+    
     return render(request, 'store/signup.html', {'form': form})
 def login_view(request):
+    if request.user.is_authenticated:
+        return redirect('store:store') 
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
@@ -38,7 +43,7 @@ def login_view(request):
             if user is not None:
                 login(request, user)
                 messages.success(request, "You have successfully logged in!")
-                return redirect('/store')  
+                return redirect('store:home')  
             else:
                 messages.error(request, "Invalid username or password.")
         else:
@@ -48,9 +53,9 @@ def login_view(request):
 
     return render(request, 'store/login.html', {'form': form})
 
-
-
-
+def home(request):
+    products = Product.objects.all() 
+    return render(request, 'store/home.html', {'products': products})
 
 
 @login_required
@@ -140,14 +145,53 @@ def processOrder(request):
             zipcode=data['shipping']['zipcode'],
         )
     return JsonResponse('Payment complete!', safe=False)
+# @login_required
+# def product(request, pk):
+#     product = get_object_or_404(Product, pk=pk)
+#     reviews = ProductReview.objects.filter(product=product)
 
-@login_required
-def product(request, pk): 
+#     if request.method == 'POST':
+#         form = ProductReviewForm(request.POST)
+#         if form.is_valid():
+#             review = form.save(commit=False)
+#             review.product = product
+#             review.user = request.user
+#             review.save()
+#             return redirect('store:product', pk=product.pk)
+#     else:
+#         form = ProductReviewForm()
+
+#     context = {
+#         'product': product,
+#         'reviews': reviews,
+#         'form': form,
+#     }
+#     return render(request, 'store/product.html', context)
+
+# @login_required
+def product(request, pk):
     product = get_object_or_404(Product, pk=pk)
+    reviews = ProductReview.objects.filter(product=product)
+
+    if request.method == 'POST':
+        rating = int(request.POST.get('rating', 0))
+        review_text = request.POST.get('review', '').strip()
+
+        if rating > 0:
+            ProductReview.objects.create(
+                product=product,
+                user=request.user,
+                review=review_text,
+                rating=rating
+            )
+            return redirect('store:product', pk=product.pk)
+
     context = {
         'product': product,
+        'reviews': reviews,
     }
     return render(request, 'store/product.html', context)
+
 @login_required
 def profile(request):
     user = request.user
@@ -157,9 +201,10 @@ def profile(request):
         form = ProductForm(request.POST, request.FILES)
         if form.is_valid():
             product = form.save(commit=False)
-            product.user = user  # Associate the product with the logged-in user
+            product.user = user  
             product.save()
-            return redirect('/profile')  # Redirect to profile page after adding the product
+            return redirect('/profile') 
+            
     else:
         form = ProductForm()
 
@@ -180,6 +225,14 @@ def user_logout(request):
 
 from django.shortcuts import render
 from .models import Product, Category  # Adjust based on your models
+@login_required
+def delete_review(request, review_id):
+    review = get_object_or_404(ProductReview, id=review_id)
+    if review.user != request.user:
+        return HttpResponseForbidden("You are not allowed to delete this review.")
+    
+    review.delete()
+    return redirect('store:product', pk=review.product.id)
 
 @login_required
 def search_view(request):
@@ -302,3 +355,6 @@ def remove_product(request, product_id):
         return redirect('/profile') 
         
         # return render(request, 'store/profile.html', context)
+
+
+    

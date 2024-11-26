@@ -225,12 +225,39 @@
             background-color: #ffcc00;
             transform: translateY(-2px);
         }
+        .stars {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+    cursor: pointer;
+    }
+    .stars {
+    display: flex;
+    flex-direction: row-reverse; /* Align stars from right to left */
+    justify-content: flex-start;
+    cursor: pointer;
+}
+
+.stars input {
+    display: none; /* Hide radio buttons */
+}
+
+.stars label {
+    font-size: 30px;
+    color: gray; /* Default color for stars */
+    transition: color 0.2s;
+}
+
+.stars label.shined {
+    color: gold; 
+}
+
     </style>
 </head>
 
 <body>
     <nav class="header">
-        <a href="{% url 'store:store' %}" class="logo" class = "margin-left: 20px;">Online Shop </a>
+        <a href="{% url 'store:home' %}" class="logo" class = "margin-left: 20px;">Online Shop </a>
         <div class="header-right">
             <a href="{% url 'store:cart' %}">
                 <img id="cart-icon" src="{% static 'images/cart.png' %}">
@@ -241,7 +268,7 @@
         </div>
     </nav>
         </form>
-    
+        
     
     
     <div class="container">
@@ -265,3 +292,48 @@
 </body>
 
 </html>
+
+<script>
+    document.querySelectorAll('.stars label').forEach(label => {
+        label.addEventListener('mouseenter', () => {
+            label.style.color = 'gold'; // Shine the hovered star
+        });
+        label.addEventListener('mouseleave', () => {
+            const radio = document.querySelector('.stars input:checked');
+            if (!radio || label.htmlFor !== radio.id) {
+                label.style.color = 'gray'; // Reset if not selected
+            }
+        });
+    });
+    document.addEventListener('DOMContentLoaded', () => {
+    const stars = document.querySelectorAll('.stars label');
+    const inputs = document.querySelectorAll('.stars input');
+
+    // Function to update star highlighting based on the clicked or hovered star
+    const updateStars = (index) => {
+        stars.forEach((star, i) => {
+            if (i <= index) {
+                star.classList.add('shined'); // Highlight stars up to the selected index
+            } else {
+                star.classList.remove('shined'); // Remove highlighting for others
+            }
+        });
+    };
+
+    // Add event listeners for clicks
+    stars.forEach((star, index) => {
+        star.addEventListener('click', () => {
+            inputs[index].checked = true; // Set the corresponding input as checked
+            updateStars(index); // Update highlighting
+        });
+
+        // Add hover effects
+        star.addEventListener('mouseenter', () => updateStars(index));
+        star.addEventListener('mouseleave', () => {
+            // Reset highlighting to match the selected star
+            const selectedIndex = [...inputs].findIndex(input => input.checked);
+            updateStars(selectedIndex);
+        });
+    });
+});
+    </script>

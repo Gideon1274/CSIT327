@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
 from .models import Product
+from .models import ProductReview
+
 
 class ProductForm(forms.ModelForm):
     class Meta:
@@ -22,8 +24,8 @@ class SignUpForm(UserCreationForm):
         if commit:
             user.save()
         return user
-    
-    
+
+
 class LoginForm(forms.Form):
     username = forms.CharField()
     password = forms.CharField(widget=forms.PasswordInput)
@@ -36,3 +38,13 @@ class ContactForm(forms.Form):
     
     def send_email(self):
         print(f"Sending email from {self.cleaned_data['email']} with message: {self.cleaned_data['message']} ")
+
+
+class ProductReviewForm(forms.ModelForm):
+    class Meta:
+        model = ProductReview
+        fields = ['review', 'rating']
+        widgets = {
+            'review': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'rating': forms.NumberInput(attrs={'class': 'form-control', 'min': 1, 'max': 5}),
+        }

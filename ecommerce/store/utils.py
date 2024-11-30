@@ -46,22 +46,41 @@ def cookieCart(request):
     return {'cartItems': cartItems, 'order': order, 'items': items}
 
 
-def cartData(request):
-    if request.user.is_authenticated:
-        customer = request.user.customer
-        order, created = Order.objects.get_or_create(
-            customer=customer, complete=False)
-        items = order.orderitem_set.all()
-        cartItems = order.get_cart_items
-    # else:
-    #     cookieData = cookieCart(request)
-    #     cartItems = cookieData['cartItems']
-    #     order = cookieData['order']
-    #     items = cookieData['items']
-    print(customer)
+# def cartData(request):
+#     if request.user.is_authenticated:
+#         customer = request.user.customer
+#         order, created = Order.objects.get_or_create(
+#             customer=customer, complete=False)
+#         items = order.orderitem_set.all()
+#         cartItems = order.get_cart_items
+#     # else:
+#     #     cookieData = cookieCart(request)
+#     #     cartItems = cookieData['cartItems']
+#     #     order = cookieData['order']
+#     #     items = cookieData['items']
+#     # print(customer)
      
-    return {'cartItems': cartItems, 'order': order, 'items': items}
+#     return {'cartItems': cartItems, 'order': order, 'items': items}
 
+def cartData(request):
+    cartItems = 0
+    order = {'get_cart_total': 0, 'get_cart_items': 0}
+    items = []
+
+    try:
+        if request.user.is_authenticated:
+            customer = request.user.customer
+            order = Order.objects.get(customer=customer, complete=False)
+            items = order.orderitem_set.all()
+            cartItems = order.get_cart_items
+        else:
+            cart = json.loads(request.COOKIES.get('cart', '{}'))
+            for i in cart:
+                cartItems += cart[i]['quantity']
+    except Exception as e:
+        print(f"Error in cartData: {e}")
+
+    return {'cartItems': cartItems, 'order': order, 'items': items}
 
 def guestOrder(request, data):
     

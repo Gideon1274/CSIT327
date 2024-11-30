@@ -37,6 +37,7 @@ class Product(models.Model):
 	name = models.CharField(max_length=200)
 	price = models.DecimalField(max_digits=10, decimal_places=2)
 	image = models.ImageField(upload_to='products/')
+	digital = models.BooleanField(default=False) 
 	category = models.ForeignKey(Category, on_delete=models.CASCADE)
 	user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='products')
 	description = models.CharField(max_length=200, null=True, default="") 
@@ -116,20 +117,22 @@ class ShippingAddress(models.Model):
 	
 
 class ProductReview(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    review = models.CharField(max_length=200, null=True)
-    rating = models.PositiveIntegerField(
+	product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
+	user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+	review = models.CharField(max_length=200, null=True)
+	
+	rating = models.PositiveIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(5)],
         null=True,
         blank=True
     )
-    date_added = models.DateTimeField(auto_now_add=True)
+	
+	date_added = models.DateTimeField(auto_now_add=True)
+	
+	def display_stars(self):
+		filled_stars = '★' * self.rating  # Filled stars
+		empty_stars = '☆' * (5 - self.rating)  # Empty stars
+		return filled_stars + empty_stars
 
-    def display_stars(self):
-        filled_stars = '★' * self.rating  # Filled stars
-        empty_stars = '☆' * (5 - self.rating)  # Empty stars
-        return filled_stars + empty_stars
-
-    def __str__(self):
-        return self.review
+	def __str__(self):
+		return self.review

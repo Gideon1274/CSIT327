@@ -2,23 +2,6 @@
 {% load static %}
 
 {% block content %}
-<div class="header-right">
-    <!-- Search Form -->
-    <form method="get" action="{% url 'store:store' %}" class="search_form">
-        <input type="text" name="query" placeholder="Search..." class="form-control" value="{{ request.GET.query }}">
-
-        <select name="category" class="form-control" onchange="this.form.submit()">
-            <option value="" {% if not request.GET.category %}selected{% endif %}>All categories</option>
-            {% for category in categories %}
-                <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"s" %}selected{% endif %}>
-                    {{ category.name }}
-                </option>
-            {% endfor %}
-        </select>
-
-        <button type="submit" class="btn btn-outline-success">Search</button>
-    </form>
-</div>
 
 <!-- Products Section -->
 <div class="row">

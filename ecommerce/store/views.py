@@ -53,9 +53,28 @@ def login_view(request):
 
     return render(request, 'store/login.html', {'form': form})
 
+from django.contrib.auth.decorators import login_required
+
 def home(request):
     products = Product.objects.all() 
-    return render(request, 'store/home.html', {'products': products})
+    
+    
+    cart_data = cartData(request)
+    cartItems = cart_data['cartItems']
+    order = cart_data['order']
+    items = cart_data['items']
+
+    
+    context = {
+        'products': products,
+        'items': items,
+        'order': order,
+        'cartItems': cartItems,
+    }
+
+    return render(request, 'store/home.html', context)
+
+
 
 
 @login_required
@@ -252,7 +271,7 @@ def search_view(request):
         'products': products,
         'cartItems': cartData(request)['cartItems'],  # Ensure cartItems are included
     }
-    return render(request, 'store/store.html', context)  # Render store.html with the context
+    return render(request, 'store/home.html', context)  # Render store.html with the context
 
 
 from django.shortcuts import render

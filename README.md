@@ -2,8 +2,10 @@
 
 ## Online Shopping Ecommerce: Online Shop
 
-
-
+**Members**
+Rainric Randy P. Yu
+Bryle Anthony G. Dinapo
+Keith yancy A. Rigodon
 
 ### Project Resources
 
@@ -26,13 +28,33 @@ With Online Shopping you can now order the things you like buy. duh
 * **Home Delivery and Convenience** Products are delivered directly to your doorstep, saving time and effort, especially for bulky or heavy items.
 
 
-## Installation
+## Installation/How to run the program
+1. Create a new branch:
+    ```sh
+    git clone https://github.com/Gideon1274/CSIT327.git
+    ```
+2. Install the requirements
+   ```sh
+   pip install -r requirements.txt
+   ```
+3. 1st Step. Go the CSIT327's folder
+   ```sh
+   cd CSIT327
+   ```
+4. 2st Step. Go to Ecommerce
+   ```sh
+   cd ecommerce
+   ```
+3. 3st Step. Start the server
+   ```sh
+   py manage.py runserver
+   ```
+   
+## How to create a SuperUser/Admin
+ ```sh
+py manage.py createsuperuser
+ ```
 
-React has been designed for gradual adoption from the start, and **you can use as little or as much React as you need**:
-
-* Use [Quick Start](https://react.dev/learn) to get a taste of React.
-* [Add React to an Existing Project](https://react.dev/learn/add-react-to-an-existing-project) to use as little or as much React as you need.
-* [Create a New React App](https://react.dev/learn/start-a-new-react-project) if you're looking for a powerful JavaScript toolchain.
 
 ## Documentation
 

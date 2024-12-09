@@ -33,7 +33,7 @@ With Online Shopping you can now order the things you like buy. duh
     ```sh
     git clone https://github.com/Gideon1274/CSIT327.git
     ```
-2. Install the requirements
+2. Install the requirementss
    ```sh
    pip install -r requirements.txt
    ```

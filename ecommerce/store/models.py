@@ -16,7 +16,7 @@ class Customer(models.Model):
 		return self.name
 
 class Category(models.Model):
-    name = models.CharField(max_length=200, default="Default")
+    name = models.CharField(max_length=200, default="")
 
     def __str__(self):
         return self.name
@@ -40,7 +40,7 @@ class Product(models.Model):
 	digital = models.BooleanField(default=False) 
 	category = models.ForeignKey(Category, on_delete=models.CASCADE)
 	user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='products')
-	description = models.CharField(max_length=200, null=True, default="") 
+	description = models.CharField(max_length=2000, null=True, default="") 
 
 	def __str__(self):
 		return self.name
@@ -62,8 +62,11 @@ class Order(models.Model):
 	date_ordered = models.DateTimeField(auto_now_add=True)
 	complete = models.BooleanField(default=False)
 	transaction_id = models.CharField(max_length=100, null=True)
-
+	digital = models.BooleanField(default=False)
+	shipping = models.BooleanField(default=False)
+	name = models.CharField(max_length=200, null=True)
 	def __str__(self):
+		
 		return str(self.id)
 
 	@property
@@ -71,7 +74,7 @@ class Order(models.Model):
 		shipping = False
 		orderitems = self.orderitem_set.all()
 		for i in orderitems:
-			if i.product.digital == False:
+			if i.product is not None and not i.product.digital:
 				shipping = True
 		return shipping
 

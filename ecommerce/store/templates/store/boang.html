@@ -243,7 +243,7 @@
 
         <div class="header-right">
             <!-- Search Form -->
-            <form method="get" action="{% url 'store:store' %}" class="search_form">
+            <form method="get" action="{% url 'store:home' %}" class="search_form">
                 <input type="text" name="query" placeholder="Search..." class="form-control" value="{{ request.GET.query }}">
         
                 <select name="category" class="form-control" onchange="this.form.submit()">

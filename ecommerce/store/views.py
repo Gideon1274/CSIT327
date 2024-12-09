@@ -56,17 +56,26 @@ def login_view(request):
 from django.contrib.auth.decorators import login_required
 
 def home(request):
-    products = Product.objects.all() 
-    
-    
+    query = request.GET.get('query', '')
+    category_id = request.GET.get('category', '')
+
+    products = Product.objects.all()
+    categories = Category.objects.all()
+
+    if category_id:
+        products = products.filter(category_id=category_id)
+
+    if query:
+        products = products.filter(name__icontains=query)
+
     cart_data = cartData(request)
     cartItems = cart_data['cartItems']
     order = cart_data['order']
     items = cart_data['items']
 
-    
     context = {
         'products': products,
+        'categories': categories,
         'items': items,
         'order': order,
         'cartItems': cartItems,
@@ -347,7 +356,7 @@ def store(request):
         'categories': categories,
         'cartItems': cartData(request)['cartItems'],
     }
-    return render(request, 'store/store.html', context)
+    return render(request, 'store/home.html', context)
 
 
 

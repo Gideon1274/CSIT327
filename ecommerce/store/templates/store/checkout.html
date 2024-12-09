@@ -180,6 +180,8 @@
 </script>
 
 <script type="text/javascript">
+    var shipping = '{{ order.shipping|default:"False" }}';
+    var total = '{{ order.get_cart_total|default:0 }}';
     var shipping = '{{ order.shipping }}';
     var total = '{{order.get_cart_total}}';
 
@@ -197,6 +199,7 @@
         // Show payment if logged in user wants to buy an item that does not require shipping
         document.getElementById('payment-info').classList.remove("hidden");
     }
+
 
     var form = document.getElementById('form');
     csrftoken = form.getElementsByTagName('input')[0].value;
